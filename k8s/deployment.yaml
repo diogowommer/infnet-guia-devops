@@ -373,7 +373,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "count(count by (pod) (container_last_seen{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}))",
+              "expr": "count(count by (pod) (container_last_seen{namespace=\"default\",pod=~\"guia-app-.*\"}))",
               "refId": "A"
             }
           ],
@@ -389,7 +389,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}[5m]))",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\"}[5m]))",
               "refId": "A"
             }
           ],
@@ -405,7 +405,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "sum(container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\"})",
               "refId": "A"
             }
           ],
@@ -421,7 +421,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "sum(container_spec_memory_limit_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "expr": "sum(container_spec_memory_limit_bytes{namespace=\"default\",pod=~\"guia-app-.*\"})",
               "refId": "A"
             }
           ],
@@ -449,7 +449,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}[5m]))",
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\"}[5m]))",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
@@ -476,7 +476,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "prometheus" },
-              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\"})",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }

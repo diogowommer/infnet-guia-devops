@@ -71,7 +71,7 @@ data:
           - source_labels: [__meta_kubernetes_node_name]
             regex: (.+)
             target_label: __metrics_path__
-            replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -94,6 +94,8 @@ metadata:
     app: prometheus
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: prometheus
