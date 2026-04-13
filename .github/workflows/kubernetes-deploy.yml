@@ -93,4 +93,4 @@ jobs:
   #         context: .
   #         file: ./Dockerfile
   #         push: true
-  #         tags: diogowommerinfnet/infnet-guia-devops:latest
+  #         tags: diogowommer/infnet-guia-devops:latest

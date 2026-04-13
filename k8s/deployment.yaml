@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: diogowommerinfnet/infnet-guia-devops
+          image: diogowommer/infnet-guia-devops
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
