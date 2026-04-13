@@ -1,7 +1,40 @@
 # Prometheus — aplicar depois de deployment.yaml (namespace default).
-# Sidecar node_exporter: métricas do nó (CPU, RAM, disco) via hostPath /proc, /sys, /.
-# O scrape usa localhost — mesmo network namespace do pod; escopo = nó onde o Prometheus roda.
+# Coleta métricas do Prometheus, do nó via node_exporter e dos containers via kubelet/cAdvisor.
 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/metrics
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: default
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,6 +54,36 @@ data:
       - job_name: node_exporter
         static_configs:
           - targets: [127.0.0.1:9100]
+
+      - job_name: kubernetes-cadvisor
+        scheme: https
+        kubernetes_sd_configs:
+          - role: node
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,6 +102,7 @@ spec:
       labels:
         app: prometheus
     spec:
+      serviceAccountName: prometheus
       securityContext:
         fsGroup: 65534
         runAsNonRoot: true
@@ -111,7 +175,8 @@ spec:
           configMap:
             name: prometheus-config
         - name: data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: prometheus-data
         - name: proc
           hostPath:
             path: /proc

@@ -116,7 +116,7 @@ data:
       "templating": { "list": [] },
       "time": { "from": "now-30m", "to": "now" },
       "timezone": "browser",
-      "title": "Guia Infnet - Prometheus + Nó (lab)",
+      "title": "Guia Infnet - Aplicação + Kubernetes",
       "uid": "guia-infnet-prometheus",
       "version": 1,
       "panels": [
@@ -363,6 +363,124 @@ data:
               "refId": "B"
             }
           ]
+        },
+        {
+          "type": "stat",
+          "title": "Pods guia-app monitorados",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 26 },
+          "id": 13,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(count by (pod) (container_last_seen{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+        },
+        {
+          "type": "stat",
+          "title": "CPU guia-app",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 26 },
+          "id": 14,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}[5m]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "cores", "decimals": 3 } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+        },
+        {
+          "type": "stat",
+          "title": "Memória guia-app",
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 26 },
+          "id": 15,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+        },
+        {
+          "type": "stat",
+          "title": "Limite memória guia-app",
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 26 },
+          "id": 16,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(container_spec_memory_limit_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+        },
+        {
+          "type": "timeseries",
+          "title": "CPU guia-app por pod",
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 30 },
+          "id": 17,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "cores",
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "lineInterpolation": "smooth",
+                "showPoints": "never"
+              }
+            }
+          },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"}[5m]))",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Memória guia-app por pod",
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 30 },
+          "id": 18,
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "lineInterpolation": "smooth",
+                "showPoints": "never"
+              }
+            }
+          },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\",pod=~\"guia-app-.*\",container=\"app\"})",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ]
         }
       ]
     }
@@ -409,13 +527,13 @@ spec:
               mountPath: /var/lib/grafana/dashboards
           readinessProbe:
             httpGet:
-              path: /api/health/ready
+              path: /api/health
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /api/health/live
+              path: /api/health
               port: http
             initialDelaySeconds: 30
             periodSeconds: 20
