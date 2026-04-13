@@ -90,7 +90,7 @@ jobs:
   #     - name: Build e push
   #       uses: docker/build-push-action@v5
   #       with:
-  #         context: ./seu-projeto-app
-  #         file: ./seu-projeto-app/Dockerfile
+  #         context: .
+  #         file: ./Dockerfile
   #         push: true
-  #         tags: SEU_USUARIO/minha-app:latest
+  #         tags: diogowommerinfnet/infnet-guia-devops:latest
